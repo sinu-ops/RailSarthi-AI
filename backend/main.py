@@ -45,6 +45,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    cache={}
 )
 
 # Initialize Data Manager
@@ -153,6 +154,7 @@ def get_train_schedule(train_no: str = Path(..., pattern=r"^\d{5}$")):
 @app.get("/api/v1/trains/{train_no}/live", response_model=LiveStatusResponse, tags=["Live Telemetry"])
 def get_live_status(train_no: str = Path(..., pattern=r"^\d{5}$")):
     """Get real-time live status and delay telemetry."""
+    
     live_obs = data_manager.get_live_observation(train_no, client=api_client)
     info = live_obs.get("data", {})
     delay = int(info.get("delayMinutes", 0))
