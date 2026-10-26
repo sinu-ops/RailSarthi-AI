@@ -1,328 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RailSarthi AI — Journey Intelligence</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bone: #F8F4EC;
-      --paper: #F0E8D8;
-      --amber: #B45309;
-      --rust: #C2410C;
-      --charcoal: #1C1917;
-      --stone: #57534E;
-      --light-stone: #78716C;
-      --divider: #D6CBA8;
-      --shadow-soft: rgba(28, 25, 23, 0.06);
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RailSarthi AI — Predict. Plan. Travel Smarter.</title>
+<meta name="description" content="RailSarthi AI: Indian Railway Journey Intelligence Platform with predictive delay modeling, live status, and agentic trip recommendations." />
 
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-    html { scroll-behavior: smooth; }
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
 
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bone);
-      color: var(--charcoal);
-      line-height: 1.55;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    /* Typography */
-    h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; color: var(--charcoal); line-height: 1.15; letter-spacing: -0.02em; }
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#0F1525',
+          navy: '#15284B',
+          ivory: '#F6F0E4',
+          saffron: '#C28A3E',
+          rust: '#A55A2A',
+          stone: '#6E6354',
+          paper: '#FAF7F0',
+          emerald: '#2A5941',
+          gold: '#D4A843',
+        },
+        fontFamily: {
+          display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+          body: ['"Inter"', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
 
-    /* Layout — single editorial column, left-aligned */
-    .container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--ivory); color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  ::selection { background: rgba(194,138,62,0.18); color: inherit; }
 
-    /* Hero — single orchestrated moment: fade-in + slide-up */
-    @keyframes revealUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .hero-reveal { animation: revealUp 0.9s ease-out both; }
+  /* Typography scale — editorial */
+  .display { font-family: 'Cormorant Garamond', Georgia, serif; letter-spacing: -0.03em; line-height: 1.05; }
+  .display-sm { font-family: 'Cormorant Garamond', Georgia, serif; letter-spacing: -0.02em; }
 
-    header.hero {
-      padding: 120px 0 80px;
-    }
-    header.hero .label {
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 1.25rem;
-      display: block;
-    }
-    header.hero h1 {
-      font-size: clamp(3rem, 8vw, 5.5rem);
-      font-weight: 600;
-      color: var(--charcoal);
-      margin-bottom: 0.6rem;
-      letter-spacing: -0.04em;
-    }
-    header.hero h1 em {
-      font-style: italic;
-      color: var(--rust);
-    }
-    header.hero .subline {
-      font-family: 'Inter', sans-serif;
-      font-weight: 300;
-      font-size: 1.1rem;
-      color: var(--stone);
-      max-width: 560px;
-      line-height: 1.6;
-    }
+  /* 3D Scene */
+  #train-scene { position: relative; width: 100%; height: 100vh; overflow: hidden; background: linear-gradient(180deg, #0F1525 0%, #15284B 60%, #0F1525 100%); }
+  #train-canvas { display: block; width: 100%; height: 100%; }
+  .scene-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 10;
+    background: linear-gradient(0deg, rgba(15,21,37,0.7) 0%, rgba(15,21,37,0.1) 35%, rgba(15,21,37,0.1) 65%, rgba(15,21,37,0.85) 100%);
+  }
 
-    /* Sections — quiet, no decorative borders unless structural */
-    section { padding: 80px 0; border-top: 1px solid var(--divider); }
+  /* Scroll-controlled 3D section */
+  .scroll-section { height: 100vh; position: relative; }
 
-    section h2 {
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-      color: var(--charcoal);
-    }
-    section .lead {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-style: italic;
-      font-size: 1.15rem;
-      color: var(--stone);
-      max-width: 640px;
-      line-height: 1.7;
-      margin-bottom: 2rem;
-    }
+  /* Navigation */
+  nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(14px) saturate(140%); background: rgba(250,247,240,0.82); border-bottom: 1px solid rgba(15,21,37,0.08); }
+  nav a { font-family: 'Inter', system-ui; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); text-decoration: none; border-bottom: 1.5px solid transparent; transition: border-color .15s; }
+  nav a:hover { border-bottom-color: var(--saffron); }
 
-    /* Cards — disciplined, not identical rounded boxes everywhere */
-    .feature-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px;
-      margin-top: 2.5rem;
-    }
-    .card {
-      background: #fff;
-      border: 1px solid var(--divider);
-      border-radius: 8px;
-      padding: 28px;
-      box-shadow: 0 1px 2px var(--shadow-soft);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      position: relative;
-    }
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(28,25,23,0.08);
-    }
-    .card .card-tag {
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 0.75rem;
-    }
-    .card h3 {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 1.15rem;
-      font-weight: 600;
-      margin-bottom: 0.6rem;
-      color: var(--charcoal);
-    }
-    .card p {
-      font-size: 0.9rem;
-      color: var(--stone);
-      line-height: 1.65;
-    }
+  /* Hero typography */
+  .hero-text { position: relative; z-index: 20; }
+  .hero-label { font-family: 'Inter', system-ui; font-weight: 500; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem; display: block; }
 
-    /* Search / Input — minimal, warm */
-    .search-block {
-      background: linear-gradient(135deg, #F0E8D8 0%, #F8F4EC 100%);
-      border: 1px solid var(--divider);
-      border-radius: 12px;
-      padding: 32px;
-      margin-top: 3rem;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
-    }
-    .search-block input[type="text"] {
-      width: 100%;
-      padding: 14px 18px;
-      font-family: 'Inter', sans-serif;
-      font-size: 1rem;
-      border: 1.5px solid var(--divider);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--charcoal);
-      outline: none;
-    }
-    .search-block input[type="text"]:focus {
-      border-color: var(--amber);
-      box-shadow: 0 0 0 3px rgba(180,83,9,0.12);
-    }
-    .btn-amber {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 14px 28px;
-      background: var(--amber);
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      font-size: 0.95rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-amber:hover { background: var(--rust); }
+  /* Cards — disciplined, not generic */
+  .feature-card { background: #fff; border: 1px solid #E8DED0; border-radius: 10px; padding: 28px; box-shadow: 0 1px 3px rgba(15,21,37,0.04); transition: transform .2s ease, box-shadow .2s ease; }
+  .feature-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(15,21,37,0.08); }
 
-    /* Metrics / Stats — clean, not card-kit */
-    .metrics-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-      margin-top: 2rem;
-    }
-    .metric-box {
-      border-top: 3px solid var(--amber);
-      padding-top: 14px;
-    }
-    .metric-box .num {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 2rem;
-      color: var(--charcoal);
-      line-height: 1.1;
-    }
-    .metric-box .label {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
-      color: var(--light-stone);
-      letter-spacing: 0.03em;
-      margin-top: 4px;
-    }
+  /* Buttons — warm, not purple */
+  .btn-primary { background: var(--navy); color: #F6F0E4; font-family: 'Inter', system-ui; font-weight: 500; font-size: 0.9rem; padding: 14px 28px; border-radius: 8px; border: none; cursor: pointer; transition: background .2s; letter-spacing: 0.02em; }
+  .btn-primary:hover { background: #1A3262; }
+  .btn-amber { background: var(--amber); color: #fff; font-family: 'Inter', system-ui; font-weight: 500; font-size: 0.9rem; padding: 14px 28px; border-radius: 8px; border: none; cursor: pointer; transition: background .2s; }
+  .btn-amber:hover { background: var(--rust); }
 
-    /* Small divider / structural rule */
-    .hairline {
-      height: 1px;
-      background: linear-gradient(to right, transparent, var(--divider), transparent);
-      border: none;
-      margin: 3rem 0;
-    }
+  /* Scroll reveal — single orchestrated moment per section */
+  @keyframes revealUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal { animation: revealUp 0.85s ease-out both; }
+  .reveal-delay-1 { animation-delay: 0.15s; animation-fill-mode: both; }
+  .reveal-delay-2 { animation-delay: 0.3s; animation-fill-mode: both; }
 
-    /* Footer */
-    footer {
-      padding: 60px 0 40px;
-      border-top: 1px solid var(--divider);
-      color: var(--light-stone);
-      font-size: 0.85rem;
-    }
-    footer a { color: var(--amber); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, #train-canvas { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
 
-    /* Responsive */
-    @media (max-width: 640px) {
-      header.hero { padding: 80px 0 50px; }
-      h1 { font-size: 2.6rem; }
-      .feature-row { grid-template-columns: 1fr; }
-    }
-
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      .hero-reveal { animation: none; opacity: 1; transform: none; }
-    }
-  </style>
+  /* Input */
+  input[type="text"] {
+    font-family: 'Inter', system-ui; font-size: 1rem; padding: 14px 18px; border: 1.5px solid #D6CBA8;
+    border-radius: 8px; background: #fff; color: var(--ink); outline: none; max-width: 320px; width: 100%;
+  }
+  input[type="text"]:focus { border-color: var(--saffron); box-shadow: 0 0 0 3px rgba(194,138,62,0.12); }
+</style>
 </head>
-<body>
+<body class="bg-ivory text-ink antialiased">
 
-  <header class="hero container hero-reveal">
-    <span class="label">Railway Journey Intelligence</span>
-    <h1>Predict. Plan.<br><em>Travel Smarter.</em></h1>
-    <p class="subline">RailSarthi AI combines live train telemetry, predictive XGBoost modeling, and agentic recommendations — built for Indian railway passengers who want answers, not just schedules.</p>
-  </header>
-
-  <main class="container">
-
-    <!-- Search Block -->
-    <section aria-label="Search">
-      <div class="search-block">
-        <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.4rem; color: var(--charcoal); margin-bottom: 0.25rem;">Find your train</h2>
-        <p style="font-size: 0.9rem; color: var(--stone); margin-bottom: 1rem;">Search by number (e.g., 12302, 12951) or train name.</p>
-        <form onsubmit="event.preventDefault(); document.getElementById('results').scrollIntoView({behavior:'smooth'});">
-          <input type="text" id="searchInput" placeholder="Enter train number or name..." aria-label="Train search" />
-          <button type="submit" class="btn-amber">Search →</button>
-        </form>
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50" aria-label="Main navigation">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="#" class="display text-xl text-ink tracking-tight hover:text-rust transition-colors">RailSarthi</a>
+      <div class="flex gap-8 text-sm font-medium tracking-wide">
+        <a href="#features">Features</a>
+        <a href="#predict">Predict</a>
+        <a href="#agent">Agent</a>
+        <a href="#github">GitHub</a>
       </div>
-    </section>
+    </div>
+  </nav>
 
-    <!-- Metrics -->
-    <section aria-label="System overview">
-      <h2>What the system delivers</h2>
-      <p class="lead">Not just location — understanding. Delay predictions with 6-minute accuracy, crowd-risk estimates, and an explainable AI copilot that tells you why.</p>
-
-      <div class="metrics-row">
-        <div class="metric-box">
-          <div class="num">6.25m</div>
-          <div class="label">MAE — Delay Prediction</div>
-        </div>
-        <div class="metric-box">
-          <div class="num">92.5%</div>
-          <div class="label">Crowd Classifier Accuracy</div>
-        </div>
-        <div class="metric-box">
-          <div class="num">0.96</div>
-          <div class="label">R² — Model Fit</div>
-        </div>
-        <div class="metric-box">
-          <div class="num">13</div>
-          <div class="label">Cached Trains (Memory)</div>
+  <!-- 3D Scroll Scene -->
+  <section id="train-scene" class="scroll-section relative" aria-label="3D Indian train scene">
+    <canvas id="train-canvas"></canvas>
+    <div class="scene-overlay"></div>
+    <div class="absolute inset-0 flex items-end justify-start z-20 pointer-events-none p-8 md:p-16 lg:p-24">
+      <div class="hero-text max-w-2xl reveal">
+        <span class="hero-label">Railway Journey Intelligence</span>
+        <h1 class="display text-7xl md:text-9xl text-white leading-[0.9] tracking-tight drop-shadow-lg" style="text-shadow: 0 2px 30px rgba(15,21,37,0.55);">
+          Predict.<br><span class="italic text-gold">Plan.</span><br>Travel Smarter.
+        </h1>
+        <p class="text-white/90 text-lg font-light mt-6 max-w-lg leading-relaxed">AI-powered delay forecasting, crowd-risk estimates, and an explainable journey copilot — built for Indian railway passengers.</p>
+        <div class="mt-8 flex gap-3 items-center">
+          <a href="#predict" class="btn-amber">Start Predicting</a>
+          <a href="#agent" class="btn-primary">Try the Copilot</a>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <hr class="hairline" />
+  <!-- Features -->
+  <main class="max-w-6xl mx-auto px-6 py-20" id="features">
+    <div class="reveal">
+      <h2 class="display text-4xl md:text-5xl mb-3">What RailSarthi delivers</h2>
+      <p class="text-stone text-lg leading-relaxed max-w-2xl">Not just location — understanding. Our pipeline combines real-time RailRadar telemetry, predictive XGBoost modeling, and a LangGraph reasoning agent that explains every recommendation with evidence.</p>
+    </div>
 
-    <!-- Features: Grounded in the brief -->
-    <section aria-label="Features" id="results">
-      <h2>Features</h2>
-      <p class="lead">Three integrated layers: telemetry from RailRadar, predictive ML from historical patterns, and a reasoning agent that explains its recommendations using real data.</p>
-
-      <div class="feature-row">
-        <article class="card">
-          <div class="card-tag">Telemetry</div>
-          <h3>Live Train Status</h3>
-          <p>Real-time delay, station position, and next halt from RailRadar API — cached for 5 minutes to protect quota.</p>
-        </article>
-        <article class="card">
-          <div class="card-tag">Prediction</div>
-          <h3>Delay Forecasting</h3>
-          <p>XGBoost regression predicts cascading stop-by-stop delays using route distance, temporal seasonality, and previous delay propagation.</p>
-        </article>
-        <article class="card">
-          <div class="card-tag">Agent</div>
-          <h3>Journey Copilot</h3>
-          <p>LangGraph agent answers travel questions by calling tools — comparing trains, explaining recommendations with evidence, never inventing reasons.</p>
-        </article>
-      </div>
-    </section>
-
-    <hr class="hairline" />
-
-    <!-- Design Statement -->
-    <section aria-label="Design approach">
-      <h2>Design approach</h2>
-      <p class="lead">This page is built for the railway journey context: warm cream and amber tones evoke the golden-hour glow of Indian rail journeys; Playfair Display carries editorial authority; Inter delivers readable data. No purple. No sloppy card-kit. One orchestrated reveal on load, then quiet discipline everywhere else.</p>
-      <p style="font-size: 0.85rem; color: var(--light-stone); margin-top: 1rem;">Palette: bone (#F8F4EC), amber (#B45309), rust (#C2410C), charcoal (#1C1917), stone (#57534E). Layout: left-aligned editorial column, max 880px, responsive to mobile. Motion: only the hero reveal and hover lifts on feature cards.</p>
-    </section>
-
+    <div class="grid md:grid-cols-3 gap-6 mt-12 reveal-delay-1">
+      <article class="feature-card">
+        <div class="card-tag">TELEMETRY</div>
+        <h3>Live Train Status</h3>
+        <p>Real-time delay, station position, and next halt drawn from RailRadar API — cached for 5 minutes to protect your API quota.</p>
+      </article>
+      <article class="feature-card">
+        <div class="card-tag">PREDICTION</div>
+        <h3>Delay Forecasting</h3>
+        <p>XGBoost regression predicts cascading stop-by-stop delays using distance covered, temporal seasonality, and previous delay propagation.</p>
+      </article>
+      <article class="feature-card">
+        <div class="card-tag">AGENT</div>
+        <h3>Journey Copilot</h3>
+        <p>LangGraph agent answers travel questions by selecting and calling tools — comparing trains with supporting evidence, never inventing reasons.</p>
+      </article>
+    </div>
   </main>
 
-  <footer class="container">
-    <p><strong>RailSarthi AI</strong> — Predict. Plan. Travel Smarter.</p>
-    <p>Built for the final year engineering project. Source: <a href="https://github.com/sinu-ops/RailSarthi-AI">github.com/sinu-ops/RailSarthi-AI</a> | Data: RailRadar API (free tier) + Synthetic Historical Data</p>
-    <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #A8A29E;">No live API quota wasted during design or testing. All development uses cached data and DummyRailRadarClient.</p>
+  <hr class="max-w-6xl mx-auto border-t border-[#D6CBA8]" />
+
+  <!-- Metrics -->
+  <section id="predict" class="max-w-6xl mx-auto px-6 py-20 reveal">
+    <h2 class="display text-4xl md:text-5xl mb-3">Performance</h2>
+    <p class="text-stone text-lg leading-relaxed max-w-2xl mb-10">Trained on historic patterns and validated on held-out journey data. Baseline comparison shows significant improvement over naive historical-median predictions.</p>
+
+    <div class="grid md:grid-cols-4 gap-6">
+      <div class="metric-box">
+        <div class="num text-ink">6.25m</div>
+        <div class="label">MAE — Delay Prediction</div>
+        <div class="text-xs text-stone mt-1">Baseline median MAE: 26.99 min (76.9% error reduction)</div>
+      </div>
+      <div class="metric-box">
+        <div class="num text-ink">0.96</div>
+        <div class="label">R² Score — Model Fit</div>
+        <div class="text-xs text-stone mt-1">Near-perfect variance explanation</div>
+      </div>
+      <div class="metric-box">
+        <div class="num text-ink">92.5%</div>
+        <div class="label">Crowd Classifier Accuracy</div>
+        <div class="text-xs text-stone mt-1">Macro F1: 0.8971</div>
+      </div>
+      <div class="metric-box">
+        <div class="num text-ink">5</div>
+        <div class="label">Trains Collected (Live)</div>
+        <div class="text-xs text-stone mt-1">Real-time data from RailRadar</div>
+      </div>
+    </div>
+
+    <div class="search-block rounded-xl p-8 mt-12">
+      <h3 class="display text-2xl mb-2">Search your train</h3>
+      <p class="text-stone text-sm mb-4">Select a train from saved memory, or enter a train number to trigger live fetching.</p>
+      <form onsubmit="event.preventDefault(); document.getElementById('results').scrollIntoView({behavior:'smooth'});" class="flex gap-3 items-center max-w-lg">
+        <input type="text" id="searchInput" placeholder="e.g. 12302, 12951, Dibrugarh..." aria-label="Train search" />
+        <button type="submit" class="btn-amber">Search</button>
+      </form>
+      <div id="results" class="mt-6 p-5 bg-white rounded-lg border border-[#D6CBA8] shadow-sm text-sm leading-relaxed text-ink">
+        <strong>Results will show here.</strong> Searches use saved memory first (zero API cost). If train is not cached, live RailRadar data is fetched once and saved for future queries.
+      </div>
+    </div>
+  </section>
+
+  <hr class="max-w-6xl mx-auto border-t border-[#D6CBA8]" />
+
+  <!-- Agent -->
+  <section id="agent" class="max-w-6xl mx-auto px-6 py-20 reveal">
+    <div class="grid md:grid-cols-2 gap-12 items-start">
+      <div>
+        <h2 class="display text-4xl md:text-5xl mb-3">Agentic Journey Copilot</h2>
+        <p class="text-stone text-lg leading-relaxed">Ask in plain language: <em>"I'm travelling Mumbai to Delhi tomorrow — which option is better?"</em> The agent selects tools (live status, delay prediction, reliability score), compares results, and explains the recommendation with evidence.</p>
+        <ul class="mt-6 space-y-3 text-stone text-sm">
+          <li><strong>Tool selection</strong> — picks appropriate backend endpoints</li>
+          <li><strong>Evidence grounding</strong> — cites model outputs and historical observations</li>
+          <li><strong>No hallucination</strong> — explanations come only from retrieved data, not LLM imagination</li>
+        </ul>
+        <a href="#predict" class="btn-amber inline-block mt-6">Try Predictions</a>
+      </div>
+      <div class="bg-navy rounded-2xl p-8 text-ivory shadow-2xl">
+        <h3 class="font-display text-2xl mb-4">Example Interaction</h3>
+        <div class="space-y-3 text-sm">
+          <div class="bg-white/10 rounded-lg px-4 py-3">User: <strong>Compare 12302 vs 12951 for tomorrow.</strong></div>
+          <div class="bg-amber/20 rounded-lg px-4 py-3">Agent: <strong>12302 (Rajdhani)</strong> has lower predicted delay (~6 min) and higher reliability (92.5%) vs 12951 (Tejas). Crowd risk is Medium. Recommend 12302.</div>
+        </div>
+        <p class="text-xs text-white/50 mt-4">Grounded in actual XGBoost predictions and RailRadar telemetry.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="max-w-6xl mx-auto border-t border-[#D6CBA8]" />
+
+  <!-- GitHub / Project -->
+  <section id="github" class="max-w-6xl mx-auto px-6 py-20 reveal">
+    <h2 class="display text-4xl md:text-5xl mb-3">Project</h2>
+    <p class="text-stone text-lg leading-relaxed max-w-2xl mb-6">RailSarthi AI is an open engineering project: data pipeline, ML evaluation, FastAPI backend, interactive dashboard, and AI copilot — all with documented architecture and performance metrics.</p>
+    <a href="https://github.com/sinu-ops/RailSarthi-AI" class="btn-primary inline-block">View Source on GitHub</a>
+  </section>
+
+  <footer class="max-w-6xl mx-auto px-6 pt-8 pb-10 border-t border-[#D6CBA8] flex flex-col md:flex-row justify-between items-start gap-4 text-xs text-stone">
+    <div>
+      <strong class="text-ink font-medium">RailSarthi AI</strong> — Predict. Plan. Travel Smarter.
+      <span class="block mt-1">Built for the final year engineering project.</span>
+    </div>
+    <div class="md:text-right">
+      <a href="https://github.com/sinu-ops/RailSarthi-AI" class="text-amber hover:underline">github.com/sinu-ops/RailSarthi-AI</a><br>
+      Data: RailRadar API + Synthetic Historical Data (no live quota wasted)
+    </div>
   </footer>
 
 </body>
