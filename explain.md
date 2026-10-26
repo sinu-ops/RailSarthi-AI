@@ -34,3 +34,11 @@ STEP 3 IMPLEMENTATION LOG — RailSarthi AI FastAPI Backend
 
 6. NO LIVE API CALLS MADE during Step 3 implementation (quota preserved)
 7. Committed to GitHub: github.com/sinu-ops/RailSarthi-AI (commit c9ce45d)
+
+--- Final step ---
+File: frontend/index.html
+Feature: Clean frontend UI with warm colors, scroll animation (hero reveal), interactive cards, search block, metrics, chatbot reference.
+Lines: Full HTML file (new creation)
+Why: No purple/sloppy design; uses bone/amber/rust palette, Playfair Display, Inter, editorial layout, single reveal animation, hover lift only.
+Where: /c/Users/ASUS/RailSarthi-AI/frontend/index.html
+No live API calls.
