@@ -254,3 +254,13 @@
 
 </body>
 </html>
+<script>
+  // Basic backend connectivity — fetch from FastAPI when available
+  async function fetchTrainData(trainNo) {
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/trains/${trainNo}/schedule`);
+      if (res.ok) return await res.json();
+    } catch (e) { console.log("FastAPI not running — using cached data"); }
+    return null; // Fallback to cached/local data
+  }
+</script>
