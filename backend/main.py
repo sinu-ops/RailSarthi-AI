@@ -12,7 +12,7 @@ import numpy as np
 from datetime import datetime, date
 from pathlib import Path
 from typing import List, Optional
-from fastapi import FastAPI, HTTPException, Query, Path, status
+from fastapi import FastAPI, HTTPException, Query, Path as APIPath, status
 from fastapi.middleware.cors import CORSMiddleware
 from cachetools import TTLCache, cached
 
@@ -117,7 +117,7 @@ def search_trains(q: str = Query(..., min_length=1, description="Train number or
 
 
 @app.get("/api/v1/trains/{train_no}/schedule", response_model=TrainScheduleResponse, tags=["Trains"])
-def get_train_schedule(train_no: str = Path(..., pattern=r"^\d{5}$")):
+def get_train_schedule(train_no: str = APIPath(..., pattern=r"^\d{5}$")):
     """Get complete route and schedule for a train (Cache-first)."""
     train_data, source = data_manager.get_or_fetch_train(train_no, client=api_client)
     if not train_data:
@@ -152,7 +152,7 @@ def get_train_schedule(train_no: str = Path(..., pattern=r"^\d{5}$")):
 
 
 @app.get("/api/v1/trains/{train_no}/live", response_model=LiveStatusResponse, tags=["Live Telemetry"])
-def get_live_status(train_no: str = Path(..., pattern=r"^\d{5}$")):
+def get_live_status(train_no: str = APIPath(..., pattern=r"^\d{5}$")):
     """Get real-time live status and delay telemetry."""
     
     live_obs = data_manager.get_live_observation(train_no, client=api_client)
