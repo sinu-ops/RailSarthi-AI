@@ -263,4 +263,40 @@
     } catch (e) { console.log("FastAPI not running — using cached data"); }
     return null; // Fallback to cached/local data
   }
+
+  async function fetchTrainLive(trainNo) {
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/trains/${trainNo}/live`);
+      if (res.ok) return await res.json();
+    } catch (e) { console.log("FastAPI not running — using cached data"); }
+    return null;
+  }
+
+  async function searchTrain() {
+    const input = document.getElementById('searchInput');
+    const trainNo = input.value.trim();
+    const results = document.getElementById('results');
+    if (!trainNo) { results.innerHTML = '<strong>Please enter a train number.</strong>'; return; }
+    results.innerHTML = '<p class="text-stone">Fetching from backend...</p>';
+    const data = await fetchTrainData(trainNo);
+    if (!data) {
+      results.innerHTML = `<p class="text-stone">No data for train ${trainNo}. Start FastAPI backend first (uvicorn backend.main:app).</p>`;
+      return;
+    }
+    const stops = data.stops || [];
+    let html = `<h4>${data.train_name} (${data.train_no})</h4><p>Route: ${data.source_station} → ${data.destination_station} | Distance: ${data.distance_km} km | Halts: ${data.total_halts}</p><table class="w-full text-left text-xs border-collapse"><thead><tr class="text-stone border-b border-[#D6CBA8]"><th class="py-2">Stop</th><th class="py-2">Station</th><th class="py-2">Arrival</th><th class="py-2">Departure</th><th class="py-2">Distance</th></tr></thead><tbody>`;
+    stops.slice(0, 10).forEach(s => {
+      html += `<tr class="border-b border-[#F0E8D8]"><td class="py-2">${s.sequence}</td><td class="py-2">${s.station_name} (${s.station_code})</td><td class="py-2">${s.scheduled_arrival || '—'}</td><td class="py-2">${s.scheduled_departure || '—'}</td><td class="py-2">${s.distance_km} km</td></tr>`;
+    });
+    html += `</tbody></table>`;
+    results.innerHTML = html;
+  }
+
+  // Wire up form submission
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form');
+    if (form) {
+      form.onsubmit = (e) => { e.preventDefault(); searchTrain(); };
+    }
+  });
 </script>
