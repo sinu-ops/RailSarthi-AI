@@ -436,8 +436,7 @@ if prompt := st.chat_input("Ask: Which train is best? What's the delay? Is it cr
     # User message
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Determine response based on local data + ML
-    # Search train from prompt
+    # Determine response based on local data + ML (cache-first, zero API quota)
     dm = TrainDataManager()
     query = prompt.lower().strip()
     found = None
@@ -448,15 +447,15 @@ if prompt := st.chat_input("Ask: Which train is best? What's the delay? Is it cr
 
     if found:
         train_no = found["number"]
-        train_info = dm.search_local_train(train_no)
+        train_data, source = dm.get_or_fetch_train(train_no, client=None)
 
         # Build response using actual data sources
         response_text = f"### Recommendation for Train {train_no}\n\n"
-        if train_info:
-            response_text += f"**Train:** {train_info['train_name']}\n"
-            response_text += f"**Route:** {train_info.get('source_station', '')} → {train_info.get('destination_station', '')}\n"
-            response_text += f"**Distance:** {train_info.get('distance_km', 'N/A')} km | **Halts:** {train_info.get('total_halts', 'N/A')}\n"
-            response_text += f"**Data Source:** {train_info.get('source', 'Memory') — no live API used for this response}\n\n"
+        if train_data:
+            response_text += f"**Train:** {train_data['train_name']}\n"
+            response_text += f"**Route:** {train_data.get('source_station', '')} → {train_data.get('destination_station', '')}\n"
+            response_text += f"**Distance:** {train_data.get('distance_km', 'N/A')} km | **Halts:** {train_data.get('total_halts', 'N/A')}\n"
+            response_text += f"**Data Source:** {source} — no live API used for this response\n\n"
 
             # Add delay insight (if delay model available)
             if delay_model is not None:
@@ -468,7 +467,7 @@ if prompt := st.chat_input("Ask: Which train is best? What's the delay? Is it cr
             response_text += f"**Crowd Risk:** Based on Random Forest classifier (92.5% accuracy, Macro F1 0.897). Check crowd severity card above.\n"
 
             # Add reliability
-            response_text += f"**Route Reliability:** This is a premium Rajdhani route (historical reliability ~92%).\n\n"
+            response_text += f"**Route Reliability:** Historical reliability ~92% for Rajdhani trains.\n\n"
 
             response_text += "---\n**Why this recommendation?** I compared your selected train against historical reliability scores, predicted delay cascades, and crowd-demand estimates — all using the saved data pipeline and ML evaluation results (docs/MODEL_REPORT.md).\n"
         else:

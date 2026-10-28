@@ -45,7 +45,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    cache={}
 )
 
 # Initialize Data Manager
@@ -296,3 +295,5 @@ def get_route_reliability(train_no: str):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)
+# Step 3: TTL Cache (protects RailRadar quota) — 5 min expiration
+live_status_cache = TTLCache(maxsize=100, ttl=300)

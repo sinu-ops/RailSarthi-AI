@@ -64,7 +64,7 @@ class CircuitBreaker:
         self.failure_count = 0
         self.last_failure_time = 0.0
         self.state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
-
+        
     def check_state(self) -> None:
         if self.state == "OPEN":
             if time.time() - self.last_failure_time > self.recovery_timeout:
@@ -201,3 +201,5 @@ if __name__ == "__main__":
     live_data = live.get("data", {})
     print(f"Status: {live_data.get('status')}, Delay: {live_data.get('delayMinutes')} min")
     print("API verification completed successfully!")
+
+    

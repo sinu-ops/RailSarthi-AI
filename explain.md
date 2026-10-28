@@ -42,3 +42,13 @@ Lines: Full HTML file (new creation)
 Why: No purple/sloppy design; uses bone/amber/rust palette, Playfair Display, Inter, editorial layout, single reveal animation, hover lift only.
 Where: /c/Users/ASUS/RailSarthi-AI/frontend/index.html
 No live API calls.
+
+--- Phase 4: LangGraph Agent ---
+File: src/agent/agent_graph.py
+Feature: 3-node agent (router -> tool executor -> explainer)
+Why: Agent answers travel questions using tools, not unsupported LLM knowledge
+Where: Routes via keyword intent (delay/live/reliability/general); calls DummyRailRadarClient / data_manager; explains with real metrics
+Line numbers: 1-190 (full graph definition, state typed dict, nodes, edges)
+Data source: DummyRailRadarClient (zero live API quota used)
+Commit: b47c862
+
